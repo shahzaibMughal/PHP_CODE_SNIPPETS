@@ -77,12 +77,28 @@ class UploadFile
     // $_FILES is a  super global array
     $file = current($_FILES);
 
-    if($this->isValid($file))
-    {
-      $this->moveFile($file);
-      return true;
+    if(is_array($file['name'])){
+      // handle multiple files upload
+      foreach ($file['name'] as $key => $value) {
+        $currentFile['name']  = $file['name'][$key];
+        $currentFile['tmp_name']  = $file['tmp_name'][$key];
+        $currentFile['type']  = $file['type'][$key];
+        $currentFile['size']  = $file['size'][$key];
+        $currentFile['error']  = $file['error'][$key];
+
+        if($this->isValid($currentFile)){
+          $this->moveFile($currentFile);
+        }
+      }
+    }else {
+      // exit("Single file is uploaded");
+      if($this->isValid($file))
+      {
+        $this->moveFile($file);
+        return true;
+      }
+      return false;
     }
-    return false;
   }
 
   protected function moveFile($file){
